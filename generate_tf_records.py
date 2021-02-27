@@ -30,6 +30,7 @@ class TFRecord:
             name_id = int(item.split('name')[1].split('id')[1].\
                                                 split(": ")[1].split('}')[0])
 
+
             items_dict[name] = name_id
         return items_dict
 
@@ -63,13 +64,16 @@ class TFRecord:
         classes_text = []
         classes = []
 
-        for index, row in group.object.iterrows():
+        for index, row in group.object.iterrows(): 
             xmins.append(row['xmin'] / width)
             xmaxs.append(row['xmax'] / width)
             ymins.append(row['ymin'] / height)
             ymaxs.append(row['ymax'] / height)
+            if not (isinstance(row['class'], str)):
+              row['class'] = str(row['class'])
             classes_text.append(row['class'].encode('utf8'))
             classes.append(self.class_text_to_int(row['class']))
+
 
         tf_sample = tf.train.Example(features=tf.train.Features(feature={
             'image/height': dataset_util.int64_feature(height),
@@ -87,6 +91,7 @@ class TFRecord:
             'image/object/class/label':\
                                     dataset_util.int64_list_feature(classes),
         }))
+
         return tf_sample
 
     def generate(self, output_path, image_dir, csv_input) -> None:
